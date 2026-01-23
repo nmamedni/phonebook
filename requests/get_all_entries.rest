@@ -1,0 +1,16 @@
+GET http://localhost:3002/api/persons/
+
+###
+GET http://localhost:3002/api/persons/2
+
+###
+DELETE http://localhost:3002/api/persons/2
+
+###
+POST http://localhost:3002/api/persons
+Content-Type: application/json
+
+{
+    "name": "VSCode testing 3 json",
+    "number": 332456254
+}
