@@ -12,6 +12,7 @@ morgan.token('date', function (req, res) { return new Date().toString() })
 // }
 
 app.use(express.json())
+app.use(express.static('dist'))
 // app.use(cors(corsOptions))
 // app.use(morgan('tiny'))
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content :date'))
