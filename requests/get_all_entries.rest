@@ -1,6 +1,9 @@
 GET http://localhost:3002/api/persons/
 
 ###
+GET http://localhost:3002/api/info/
+
+###
 GET http://localhost:3002/api/persons/2
 
 ###

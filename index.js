@@ -1,7 +1,17 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 // const cors = require('cors')
+const Person = require('./models/person')
+
 const app = express()
+
+// app.use((req, res, next) => {
+//   res.set({
+//       "Content-Security-Policy": "default-src *",
+//   })
+//   next();
+// });
 
 morgan.token('content', function (req, res) { return JSON.stringify(req.body) })
 morgan.token('date', function (req, res) { return new Date().toString() })
@@ -43,27 +53,37 @@ let phonebook = [
 
 app.get(`/api/persons`, (request, response) => {
   console.log("---Request headers:", request.headers)
-  response.status(200).json(phonebook)
+  Person.find({})
+  .then(people => {
+    console.log("people=", people)
+    response.status(200).json(people)  
+  })
+  // response.status(200).json(phonebook)
 })
 
-app.get(`/info`, (request, response) => {
-  console.log(request.headers)
-  response.send(
-    `<p>Phonebook has info for ${phonebook.length} people</p>
-     <p>${new Date().toString()}</p>
-    `
-  )
+app.get(`/api/info`, (request, response) => {
+  console.log("--- get Info request headers:", request.headers)
+  Person.countDocuments({})
+  .then(count => {
+    console.log("count", count)
+    response.send(
+      `<p>Phonebook has info for ${count} people</p>
+       <p>${new Date().toString()}</p>
+      `
+    )
+  })
 })
 
 app.get(`/api/persons/:id`, (request, response) => {
-  const id = request.params.id
-  const entry = phonebook.find(item => item?.id === id)
-  if (entry === undefined) {
-    // response.statusMessage = `Entry ${id} doesn't exist on the server`;
-    return response.status(404).end()
-  }
-  console.log(`---Found entry ${id}`)
-  response.status(200).json(entry)
+  Person.findById(request.params.id)
+  .then(person => {
+    console.log(`---Found entry ${person?.id}`)
+    response.status(200).json(person)
+  })
+  // if (entry === undefined) {
+  //   // response.statusMessage = `Entry ${request.params.id} doesn't exist on the server`;
+  //   return response.status(404).end()
+  // }
 })
 
 app.delete(`/api/persons/:id`, (request, response) => {
@@ -76,7 +96,6 @@ app.delete(`/api/persons/:id`, (request, response) => {
 })
 
 app.post(`/api/persons`, (request, response) => {
-  // console.log("---Post request headers: = ", request.headers)
   console.log("---Post request headers: host = ", request.get("host"))
   console.log("---Post request headers: origin = ", request.get("origin"))
   console.log("---Post request headers: referer = ", request.get("referer"))
@@ -84,27 +103,25 @@ app.post(`/api/persons`, (request, response) => {
   console.log("---Post request headers: content-type = ", request.get("content-type"))
   console.log("----Post request body = ", request.body)
   const name = request?.body?.name
+  const number = request?.body?.number
   if (!name) {
     return response.status(400).json({error: 'request must contain name'})
   }
-  if (!request?.body?.number) {
+  if (!number) {
     return response.status(400).json({error: 'request must contain number'})
   }
-  if (phonebook.some(item => item.name === name)) {
-    return response.status(400).json({error: 'name must be unique'})
-  }
+  // if (phonebook.some(item => item.name === name)) {
+  //   return response.status(400).json({error: 'name must be unique'})
+  // }
   
-  const id = parseInt(Math.random()*1000)
-  const entry = {
-    name: name,
-    number: request.body.number,
-    id: String(id)
-  }
-  phonebook = phonebook.concat(entry)
-  response.status(200).json(entry)
+  const person = new Person({ name, number })
+  person.save()
+  .then(savedPerson => {
+    response.status(200).json(savedPerson)
+  })
 })
 
-const PORT = process.env.PORT || 3002
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
