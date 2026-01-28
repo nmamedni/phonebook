@@ -1,10 +1,19 @@
 GET http://localhost:3002/api/persons/
 
 ###
-GET http://localhost:3002/api/info/
+GET http://localhost:3002/info/
 
 ###
 GET http://localhost:3002/api/persons/2
+
+###
+GET http://localhost:3002/api/persons/6978b198fd2a0a0daf0a512d
+
+###
+GET http://localhost:3002/api/persons/6978b198fd2a0a0daf0a0000
+
+###
+GET https://phonebook-9u4u.onrender.com/api/persons/2
 
 ###
 DELETE http://localhost:3002/api/persons/2
