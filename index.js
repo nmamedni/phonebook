@@ -27,29 +27,6 @@ app.use(express.json())
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content :date'))
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
 
-let phonebook = [
-  { 
-    "id": "1",
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": "2",
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": "3",
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": "4",
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
-
 app.get(`/api/persons`, (request, response) => {
   console.log("---Request headers:", request.headers)
   Person.find({})
@@ -122,22 +99,35 @@ app.post(`/api/persons`, (request, response, next) => {
   console.log("----Post request body = ", request.body)
   const name = request?.body?.name
   const number = request?.body?.number
-  if (!name) {
-    return response.status(400).json({error: 'request must contain name'})
-  }
-  if (!number) {
-    return response.status(400).json({error: 'request must contain number'})
-  }
+
   // if (phonebook.some(item => item.name === name)) {
   //   return response.status(400).json({error: 'name must be unique'})
   // }
   
-  const person = new Person({ name, number })
-  person.save()
-  .then(savedPerson => {
-    response.status(200).json(savedPerson)
+  Person.countDocuments({name: name})
+  .then(count => {
+    if (count > 0) {
+      throw({name:"ValidationError", message: "name already exists"})
+    }
+    else {
+      return count
+    }
+  })  
+  .then(() => {
+    const person = new Person({ name, number })
+    return person.save()
+      .then(savedPerson => {
+        response.status(200).json(savedPerson)
+      }) 
   })
   .catch(error => next(error))
+
+  // const person = new Person({ name, number })
+  // person.save()
+  // .then(savedPerson => {
+  //   response.status(200).json(savedPerson)
+  // })
+  // .catch(error => next(error))
 })
 
 
@@ -151,6 +141,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     return response.status(400).send({error: "malformatted id"})
+  }
+  else if (error.name === "ValidationError") {
+    return response.status(400).send({error: error.message})
   }
 
   next(error)
