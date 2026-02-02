@@ -27,29 +27,29 @@ app.use(express.json())
 // app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content :date'))
 app.use(morgan(':method :url :status :response-time ms - :res[content-length]'))
 
-app.get(`/api/persons`, (request, response) => {
-  console.log("---Request headers:", request.headers)
+app.get('/api/persons', (request, response) => {
+  console.log('---Request headers:', request.headers)
   Person.find({})
-  .then(people => {
-    console.log("people=", people)
-    response.status(200).json(people)  
-  })
+    .then(people => {
+      console.log('people=', people)
+      response.status(200).json(people)
+    })
 })
 
-app.get(`/info`, (request, response) => {
-  console.log("--- get Info request headers:", request.headers)
+app.get('/info', (request, response) => {
+  console.log('--- get Info request headers:', request.headers)
   Person.countDocuments({})
-  .then(count => {
-    console.log("count", count)
-    response.send(
-      `<p>Phonebook has info for ${count} people</p>
-       <p>${new Date().toString()}</p>
-      `
-    )
-  })
+    .then(count => {
+      console.log('count', count)
+      response.send(
+        `<p>Phonebook has info for ${count} people</p>
+        <p>${new Date().toString()}</p>
+        `
+      )
+    })
 })
 
-app.get(`/api/persons/:id`, (request, response, next) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -64,15 +64,15 @@ app.get(`/api/persons/:id`, (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.delete(`/api/persons/:id`, (request, response, next) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
-app.put(`/api/persons/:id`, (request, response, next) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const name = request?.body?.name
   const number = request?.body?.number
   Person.findById(request.params.id)
@@ -83,44 +83,44 @@ app.put(`/api/persons/:id`, (request, response, next) => {
       person.name = name
       person.number = number
       return person.save()
-            .then(updatedPerson => {
-              response.json(updatedPerson)
-            })
+        .then(updatedPerson => {
+          response.json(updatedPerson)
+        })
     })
     .catch(error => next(error))
 })
 
-app.post(`/api/persons`, (request, response, next) => {
-  console.log("---Post request headers: host = ", request.get("host"))
-  console.log("---Post request headers: origin = ", request.get("origin"))
-  console.log("---Post request headers: referer = ", request.get("referer"))
-  console.log("---Post request headers: content-length = ", request.headers["content-length"])
-  console.log("---Post request headers: content-type = ", request.get("content-type"))
-  console.log("----Post request body = ", request.body)
+app.post('/api/persons', (request, response, next) => {
+  console.log('---Post request headers: host = ', request.get('host'))
+  console.log('---Post request headers: origin = ', request.get('origin'))
+  console.log('---Post request headers: referer = ', request.get('referer'))
+  console.log('---Post request headers: content-length = ', request.headers['content-length'])
+  console.log('---Post request headers: content-type = ', request.get('content-type'))
+  console.log('----Post request body = ', request.body)
   const name = request?.body?.name
   const number = request?.body?.number
 
   // if (phonebook.some(item => item.name === name)) {
   //   return response.status(400).json({error: 'name must be unique'})
   // }
-  
-  Person.countDocuments({name: name})
-  .then(count => {
-    if (count > 0) {
-      throw({name:"ValidationError", message: "name already exists"})
-    }
-    else {
-      return count
-    }
-  })  
-  .then(() => {
-    const person = new Person({ name, number })
-    return person.save()
-      .then(savedPerson => {
-        response.status(200).json(savedPerson)
-      }) 
-  })
-  .catch(error => next(error))
+
+  Person.countDocuments({ name: name })
+    .then(count => {
+      if (count > 0) {
+        throw({ name:'ValidationError', message: 'name already exists' })
+      }
+      else {
+        return count
+      }
+    })
+    .then(() => {
+      const person = new Person({ name, number })
+      return person.save()
+        .then(savedPerson => {
+          response.status(200).json(savedPerson)
+        })
+    })
+    .catch(error => next(error))
 
   // const person = new Person({ name, number })
   // person.save()
@@ -139,11 +139,11 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error)
 
-  if (error.name === "CastError") {
-    return response.status(400).send({error: "malformatted id"})
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
   }
-  else if (error.name === "ValidationError") {
-    return response.status(400).send({error: error.message})
+  else if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: error.message })
   }
 
   next(error)

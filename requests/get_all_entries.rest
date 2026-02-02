@@ -19,6 +19,9 @@ GET https://phonebook-9u4u.onrender.com/api/persons/2
 DELETE http://localhost:3002/api/persons/697a0f966aa8008a778e2b41
 
 ###
+DELETE https://phonebook-9u4u.onrender.com/api/persons/697a30436167f190b295cae3
+
+###
 POST http://localhost:3002/api/persons
 Content-Type: application/json
 
